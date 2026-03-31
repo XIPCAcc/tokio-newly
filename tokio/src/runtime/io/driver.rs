@@ -8,6 +8,9 @@ cfg_io_uring! {
     use crate::sync::OnceCell;
 }
 
+#[cfg(all(target_os = "linux", feature = "uintr-core"))]
+use uintr_core;
+
 use crate::io::interest::Interest;
 use crate::io::ready::Ready;
 use crate::loom::sync::Mutex;
@@ -221,7 +224,11 @@ impl Driver {
                 ready_count += 1;
             }
         }
-
+        // 在process_uintr_wakers中处理UINTR的waker事件
+        #[cfg(all(target_os = "linux", feature = "uintr-core"))]
+        {
+            uintr_core::process_global_uintr_wakers();
+        }
         #[cfg(all(
             tokio_unstable,
             feature = "io-uring",
