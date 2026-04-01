@@ -554,6 +554,11 @@ impl Context {
         core.stats.start_processing_scheduled_tasks();
 
         while !core.is_shutdown {
+            #[cfg(all(target_os = "linux", feature = "uintr-core"))]
+            {
+                uintr_core::process_global_uintr_wakers();
+            }
+
             self.assert_lifo_enabled_is_correct(&core);
 
             if core.is_traced {
