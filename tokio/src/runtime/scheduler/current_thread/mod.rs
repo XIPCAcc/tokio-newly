@@ -777,6 +777,11 @@ impl CoreGuard<'_> {
                 }
 
                 for _ in 0..handle.shared.config.event_interval {
+                    // let (c, ()) = context.enter(core, || {
+                    //     uintr_core::process_global_uintr_wakers();
+                    // });
+                    // core = c;
+
                     // Make sure we didn't hit an unhandled_panic
                     if core.unhandled_panic {
                         return (core, None);
@@ -789,8 +794,15 @@ impl CoreGuard<'_> {
                     let task = match entry {
                         Some(entry) => entry,
                         None => {
-                            core.metrics.end_processing_scheduled_tasks();
+                            let (c, ret) = context.enter(core, || {
+                                 uintr_core::process_global_uintr_wakers()
+                            });
+                            core = c;
+                            if ret > 0 {
+                                continue;
+                            }
 
+                            core.metrics.end_processing_scheduled_tasks();
                             core = if context.has_pending_work(&core) {
                                 context.park_yield(core, handle)
                             } else {

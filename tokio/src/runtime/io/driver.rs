@@ -8,7 +8,7 @@ cfg_io_uring! {
     use crate::sync::OnceCell;
 }
 
-#[cfg(all(target_os = "linux", feature = "uintr-core"))]
+#[cfg(all(target_os = "linux"))]
 use uintr_core;
 
 use crate::io::interest::Interest;
@@ -224,6 +224,8 @@ impl Driver {
                 ready_count += 1;
             }
         }
+
+        // uintr_core::process_global_uintr_wakers();
 
         #[cfg(all(
             tokio_unstable,

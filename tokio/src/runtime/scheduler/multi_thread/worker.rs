@@ -554,10 +554,6 @@ impl Context {
         core.stats.start_processing_scheduled_tasks();
 
         while !core.is_shutdown {
-            #[cfg(all(target_os = "linux", feature = "uintr-core"))]
-            {
-                uintr_core::process_global_uintr_wakers();
-            }
 
             self.assert_lifo_enabled_is_correct(&core);
 
@@ -574,6 +570,13 @@ impl Context {
             // First, check work available to the current worker.
             if let Some(task) = core.next_task(&self.worker) {
                 core = self.run_task(task, core)?;
+                continue;
+            }
+
+            *self.core.borrow_mut() = Some(core);
+            let ret = uintr_core::process_global_uintr_wakers();
+            core = self.core.borrow_mut().take().expect("core missing");
+            if ret > 0 {
                 continue;
             }
 
