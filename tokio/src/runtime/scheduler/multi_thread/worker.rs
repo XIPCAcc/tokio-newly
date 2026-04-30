@@ -573,12 +573,12 @@ impl Context {
                 continue;
             }
 
-            *self.core.borrow_mut() = Some(core);
-            let ret = uintr_core::process_global_uintr_wakers();
-            core = self.core.borrow_mut().take().expect("core missing");
-            if ret > 0 {
-                continue;
-            }
+            // *self.core.borrow_mut() = Some(core);
+            // let ret = uintr_core::process_global_uintr_wakers();
+            // core = self.core.borrow_mut().take().expect("core missing");
+            // if ret > 0 {
+            //     continue;
+            // }
 
             // We consumed all work in the queues and will start searching for work.
             core.stats.end_processing_scheduled_tasks();
