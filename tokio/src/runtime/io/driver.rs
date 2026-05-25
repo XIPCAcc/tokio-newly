@@ -245,8 +245,9 @@ impl Driver {
             }
         }
 
-        #[cfg(all(target_os = "linux"))]
-        self.process_uintr();
+        // #[cfg(all(target_os = "linux"))]
+        // self.process_uintr();
+        // process_global_uintr_wakers();
 
         #[cfg(all(
             tokio_unstable,
